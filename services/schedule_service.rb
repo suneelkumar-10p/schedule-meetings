@@ -1,5 +1,5 @@
 class ScheduleService
-  attr_accessor :start_time, :meetings, :scheduled_meetings, :fit_into_schedule, :end_time
+  attr_accessor :start_time, :meetings, :scheduled_meetings, :end_time
 
   def initialize(meetings)
     @meetings = meetings
@@ -12,7 +12,7 @@ class ScheduleService
     onsite_meetings = meetings.select { |meeting| meeting[:type] == :onsite }
     offsite_meetings = meetings.select { |meeting| meeting[:type] == :offsite }
     onsite_meetings.each do |meeting| # schedule onsite meetings
-      end_time = start_time + meeting[:duration]
+      self.end_time = start_time + meeting[:duration]
 
       return unless fit_into_schedule
 
@@ -23,7 +23,7 @@ class ScheduleService
 
     offsite_meetings.each do |meeting| # schedule offsite meetings
       self.start_time += 0.5
-      end_time = start_time + meeting[:duration]
+      self.end_time = start_time + meeting[:duration]
 
       return unless fit_into_schedule
 
