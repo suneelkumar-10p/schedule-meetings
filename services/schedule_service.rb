@@ -15,7 +15,7 @@ class ScheduleService
     schedule_onsite_meetings(onsite_meetings)
     schedule_offsite_meetings(offsite_meetings)
 
-    scheduled_meetings.last[:end_time] > 17 ? nil : scheduled_meetings
+    fit_into_schedule ? scheduled_meetings : nil
   end
 
   def display_scheduled_meetings
