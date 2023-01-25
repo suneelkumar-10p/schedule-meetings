@@ -11,27 +11,11 @@ class ScheduleService
   def schedule_meetings
     onsite_meetings = meetings.select { |meeting| meeting[:type] == :onsite }
     offsite_meetings = meetings.select { |meeting| meeting[:type] == :offsite }
-    onsite_meetings.each do |meeting| # schedule onsite meetings
-      self.end_time = start_time + meeting[:duration]
 
-      return unless fit_into_schedule
+    schedule_onsite_meetings(onsite_meetings)
+    schedule_offsite_meetings(offsite_meetings)
 
-      scheduled_meetings.push({ start_time: start_time, end_time: end_time,
-                                name: meeting[:name] })
-      self.start_time += meeting[:duration]
-    end
-
-    offsite_meetings.each do |meeting| # schedule offsite meetings
-      self.start_time += 0.5
-      self.end_time = start_time + meeting[:duration]
-
-      return unless fit_into_schedule
-
-      scheduled_meetings.push({ start_time: start_time, end_time: end_time,
-                                name: meeting[:name] })
-      self.start_time += meeting[:duration]
-    end
-    scheduled_meetings
+    scheduled_meetings.last[:end_time] > 17 ? nil : scheduled_meetings
   end
 
   def display_scheduled_meetings
@@ -43,11 +27,30 @@ class ScheduleService
         puts "#{start_time} - #{end_time} - #{meeting[:name]}"
       end
     else
-      puts 'No, can’t fit.'
+      puts 'No, can\'t fit.'
     end
   end
 
   private
+
+  def schedule_onsite_meetings(onsite_meetings)
+    onsite_meetings.each do |meeting| # schedule onsite meetings
+      self.end_time = start_time + meeting[:duration]
+      scheduled_meetings.push({ start_time: start_time, end_time: end_time,
+                                name: meeting[:name] })
+      self.start_time += meeting[:duration]
+    end
+  end
+
+  def schedule_offsite_meetings(offsite_meetings)
+    offsite_meetings.each do |meeting| # schedule offsite meetings
+      self.start_time += 0.5
+      self.end_time = start_time + meeting[:duration]
+      scheduled_meetings.push({ start_time: start_time, end_time: end_time,
+                                name: meeting[:name] })
+      self.start_time += meeting[:duration]
+    end
+  end
 
   def fit_into_schedule
     end_time <= 17
