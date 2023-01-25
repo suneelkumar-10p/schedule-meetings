@@ -8,4 +8,5 @@ meetings = [
 ]
 
 schedule = ScheduleService.new(meetings)
-puts schedule.schedule_meetings
+schedule.schedule_meetings
+schedule.display_scheduled_meetings
