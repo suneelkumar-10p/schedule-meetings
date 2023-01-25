@@ -1,4 +1,4 @@
-require_relative 'services/scheduler_service'
+require_relative 'services/schedule_service'
 
 meetings = [
   { name: 'Meeting 1', duration: 3, type: :onsite },
@@ -6,3 +6,6 @@ meetings = [
   { name: 'Meeting 3', duration: 1, type: :offsite },
   { name: 'Meeting 4', duration: 0.5, type: :onsite }
 ]
+
+schedule = ScheduleService.new(meetings)
+puts schedule.schedule_meetings
