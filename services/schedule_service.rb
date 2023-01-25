@@ -57,8 +57,7 @@ class ScheduleService
   end
 
   def convert_time(time)
-    time = time.to_f
-    hour, minute = time.divmod(1)
+    hour, minute = time.to_f.divmod(1)
     minute = (minute * 60).round
     hour -= 12 if hour > 12
     "#{hour}:#{format '%02d', minute}"
