@@ -1,0 +1,2 @@
+class InvalidMeetings < StandardError
+end

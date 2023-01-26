@@ -1,3 +1,5 @@
+require 'byebug'
+require_relative '../errors/invalid_meetings'
 class ScheduleService
   attr_accessor :start_time, :meetings, :scheduled_meetings, :end_time
 
@@ -9,11 +11,19 @@ class ScheduleService
   end
 
   def schedule_meetings
-    onsite_meetings = meetings.select { |meeting| meeting[:type] == :onsite }
-    offsite_meetings = meetings.select { |meeting| meeting[:type] == :offsite }
+    raise InvalidMeetings, 'Invalid meetings' if meetings.map do |meeting|
+                                                       true if valid_meeting(meeting)
+                                                     end.include?(nil)
 
-    schedule_onsite_meetings(onsite_meetings)
-    schedule_offsite_meetings(offsite_meetings)
+    onsite_meetings, offsite_meetings = meetings.partition { |meeting| meeting[:type] == :onsite }
+    (onsite_meetings + offsite_meetings).each do |meeting|
+      case meeting[:type]
+      when :onsite
+        schedule_onsite_meeting(meeting)
+      when :offsite
+        schedule_offsite_meeting(meeting)
+      end
+    end
 
     fit_into_schedule ? scheduled_meetings : nil
   end
@@ -22,9 +32,7 @@ class ScheduleService
     if fit_into_schedule
       puts 'Yes, can fit. One possible solution would be:'
       scheduled_meetings.each do |meeting|
-        start_time = convert_time(meeting[:start_time])
-        end_time = convert_time(meeting[:end_time])
-        puts "#{start_time} - #{end_time} - #{meeting[:name]}"
+        puts "#{meeting[:start_time]} - #{meeting[:end_time]} - #{meeting[:name]}"
       end
     else
       puts 'No, can\'t fit.'
@@ -33,23 +41,23 @@ class ScheduleService
 
   private
 
-  def schedule_onsite_meetings(onsite_meetings)
-    onsite_meetings.each do |meeting| # schedule onsite meetings
-      self.end_time = start_time + meeting[:duration]
-      scheduled_meetings.push({ start_time: start_time, end_time: end_time,
-                                name: meeting[:name] })
-      self.start_time += meeting[:duration]
-    end
+  def valid_meeting(meeting)
+    meeting[:duration] && meeting[:duration] != '' && meeting[:type] && meeting[:type] != ''
   end
 
-  def schedule_offsite_meetings(offsite_meetings)
-    offsite_meetings.each do |meeting| # schedule offsite meetings
-      self.start_time += 0.5
-      self.end_time = start_time + meeting[:duration]
-      scheduled_meetings.push({ start_time: start_time, end_time: end_time,
-                                name: meeting[:name] })
-      self.start_time += meeting[:duration]
-    end
+  def schedule_onsite_meeting(meeting)
+    self.end_time = start_time + meeting[:duration]
+    scheduled_meetings.push({ start_time: convert_time(start_time), end_time: convert_time(end_time),
+                              name: meeting[:name] })
+    self.start_time += meeting[:duration]
+  end
+
+  def schedule_offsite_meeting(meeting)
+    self.start_time += 0.5
+    self.end_time = start_time + meeting[:duration]
+    scheduled_meetings.push({ start_time: convert_time(start_time), end_time: convert_time(end_time),
+                              name: meeting[:name] })
+    self.start_time += meeting[:duration]
   end
 
   def fit_into_schedule
