@@ -84,6 +84,30 @@ describe 'ScheduleService' do
           expect { schedule.schedule_meetings }.to raise_error 'Invalid meetings'
         end
       end
+
+      context 'when type is nil' do
+        let(:meetings) do
+          [
+            { name: 'Meeting 1', duration: 4, type: nil}
+          ]
+        end
+
+        it 'invalid meetings exception is raised' do
+          expect { schedule.schedule_meetings }.to raise_error 'Invalid meetings'
+        end
+      end
+
+      context 'when duration is nil' do
+        let(:meetings) do
+          [
+            { name: 'Meeting 1', type: :onsite, duration: nil }
+          ]
+        end
+
+        it 'invalid meetings exception is raised' do
+          expect { schedule.schedule_meetings }.to raise_error 'Invalid meetings'
+        end
+      end
     end
   end
 end

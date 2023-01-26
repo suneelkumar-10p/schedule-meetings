@@ -11,9 +11,7 @@ class ScheduleService
   end
 
   def schedule_meetings
-    raise InvalidMeetings, 'Invalid meetings' if meetings.map do |meeting|
-                                                       true if valid_meeting(meeting)
-                                                     end.include?(nil)
+    raise InvalidMeetings, 'Invalid meetings' if meetings.map { |meeting| true if valid_meeting(meeting) }.include?(nil)
 
     onsite_meetings, offsite_meetings = meetings.partition { |meeting| meeting[:type] == :onsite }
     (onsite_meetings + offsite_meetings).each do |meeting|
